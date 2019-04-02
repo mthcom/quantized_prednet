@@ -37,7 +37,7 @@ class QuantizedConv2D(Conv2D):
             **kwargs)
 
     def call(self, inputs):
-        max_range = 100000000
+        max_range = 1000000
         # compute quantized inputs and kernel
         input_max = tf.reduce_max(inputs)
         kernel_max = tf.reduce_max(self.kernel)
@@ -46,7 +46,7 @@ class QuantizedConv2D(Conv2D):
         both_max = tf.reduce_max(max_concat)
         input_muled = tf.multiply(inputs, max_range / both_max)
         kernel_muled = tf.multiply(self.kernel, max_range / both_max)
-        bias_muled = tf.multiply(self.bias, max_range / both_max)
+        bias_muled = tf.multiply(self.bias, (max_range / both_max)**2)
         input_quan = tf.cast(input_muled, tf.int32)
         kernel_quan = tf.cast(kernel_muled, tf.int32)
         bias_quan = tf.cast(bias_muled, tf.int32)
