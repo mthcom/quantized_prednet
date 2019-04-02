@@ -41,21 +41,28 @@ class QuantizedConv2D(Conv2D):
         # compute quantized inputs and kernel
         input_max = tf.reduce_max(inputs)
         kernel_max = tf.reduce_max(self.kernel)
-        max_concat = tf.stack([input_max, kernel_max])
+        bias_max = tf.reduce_max(self.bias)
+        max_concat = tf.stack([input_max, kernel_max, bias_max])
         both_max = tf.reduce_max(max_concat)
         input_muled = tf.multiply(inputs, max_range / both_max)
         kernel_muled = tf.multiply(self.kernel, max_range / both_max)
+        bias_muled = tf.multiply(self.bias, max_range / both_max)
         input_quan = tf.cast(input_muled, tf.int32)
         kernel_quan = tf.cast(kernel_muled, tf.int32)
+        bias_quan = tf.cast(bias_muled, tf.int32)
         float_input_quan = tf.cast(input_quan, tf.float32)
         float_kernel_quan = tf.cast(kernel_quan, tf.float32)
+        float_bias_quan = tf.cast(bias_quan, tf.float32)
         #set inputs and kernel to quantized values
         kernel_backup = self.kernel
+        bias_backup = self.bias
         self.kernel = float_kernel_quan
+        self.bias = float_bias_quan
         #run super
         super_output = super().call(float_input_quan)
         #dequantize
         self.kernel = kernel_backup
+        self.bias = bias_backup
         conv_dequan_one = tf.multiply(super_output, both_max / max_range)
         conv_dequan = tf.multiply(conv_dequan_one, both_max / max_range)
 
