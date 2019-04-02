@@ -6,6 +6,7 @@ from keras.layers import Recurrent
 from keras.layers import Conv2D, UpSampling2D, MaxPooling2D
 from keras.engine import InputSpec
 from keras_utils import legacy_prednet_support
+from quantized_conv import QuantizedConv2D as Conv2D
 
 class PredNet(Recurrent):
     '''PredNet architecture - Lotter 2016.
